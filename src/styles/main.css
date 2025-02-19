@@ -1,0 +1,461 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+#loginSection, #mainSection {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.separator span {
+    padding: 0 10px;
+    color: #666;
+}
+
+.product-item {
+    margin: 10px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-item input {
+    width: 60px;
+    padding: 5px;
+    text-align: center;
+}
+
+#btnLoginGoogle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.create-order {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.active-orders {
+    margin-top: 20px;
+}
+
+.order-card {
+    padding: 15px;
+    margin: 10px 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-info {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+#shareLink {
+    width: 300px;
+    padding: 5px;
+    margin-right: 10px;
+}
+
+.products-container {
+    margin-top: 20px;
+}
+
+#orderSummary {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.user-order {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: white;
+    border-radius: 4px;
+}
+
+#btnBackToOrders {
+    margin-bottom: 20px;
+    background-color: #6c757d;
+}
+
+#btnBackToOrders:hover {
+    background-color: #5a6268;
+}
+
+.summary-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.summary-actions button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.summary-actions button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.summary-actions button:active {
+    transform: translateY(0);
+}
+
+/* Estilos genéricos para modales */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Clase para cuando el modal está activo */
+.modal-overlay.active {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 5vh;
+}
+
+.modal-wrapper {
+    background-color: #fff;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Variantes de tamaño */
+.modal-sm .modal-wrapper {
+    max-width: 400px;
+}
+
+.modal-lg .modal-wrapper {
+    max-width: 800px;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+}
+
+.modal-wrapper {
+    transform: translateY(-20px);
+    transition: transform 0.2s ease-in-out;
+}
+
+.modal-overlay.show .modal-wrapper {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 10px;
+        padding: 15px;
+        width: 100%;
+        max-height: 90vh;
+    }
+
+    #totalSummary {
+        font-size: 12px;
+        padding: 10px;
+    }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+#totalSummary {
+    margin-top: 15px;
+    white-space: pre;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.4;
+    border: 1px solid #dee2e6;
+}
+
+.summary-section {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.copy-success {
+    background-color: #28a745;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    animation: fadeOut 2s forwards;
+    animation-delay: 1s;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.order-controls {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.admin-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-button:hover {
+    background-color: #45a049;
+}
+
+/* Estilos para la lista de productos en el admin */
+#productAdminContainer {
+    margin-top: 20px;
+}
+
+#productAdminContainer form {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#productAdminContainer input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#productAdminContainer button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#productAdminContainer button:hover {
+    background-color: #0056b3;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.product-item.custom {
+    background-color: #f8f9fa;
+}
+
+/* Estilos para la lista de productos en el admin */
+#productAdminContainer {
+    margin-top: 20px;
+}
+
+#productAdminContainer form {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#productAdminContainer input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#productAdminContainer button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#productAdminContainer button:hover {
+    background-color: #0056b3;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.product-item.custom {
+    background-color: #f8f9fa;
+}
