@@ -17,20 +17,25 @@ export const loginWithGoogle = async () => {
     try {
         const result = await signInWithPopup(auth, provider);
         await createUserProfile(result.user);
+    
+        handleSuccessfulLogin();
         return result.user;
     } catch (error) {
-        console.error('Error en login con Google:', error);
+        handleAuthError(error);
         throw error;
     }
+   
 };
 
 // Login con email/password
 export const loginWithEmail = async (email, password) => {
     try {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        return result.user;
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        currentUser = userCredential.user;
+        handleSuccessfulLogin();
+        return userCredential.user;
     } catch (error) {
-        console.error('Error en login con email:', error);
+        handleAuthError(error);
         throw error;
     }
 };
@@ -71,3 +76,57 @@ export const logout = async () => {
         throw error;
     }
 };
+
+// Funciones de manejo de UI
+function handleSuccessfulLogin () {
+    try {
+        const loginSection = document.getElementById('loginSection');
+        const mainSection = document.getElementById('mainSection');
+        const userNameElement = document.getElementById('userName');
+
+        if (!loginSection || !mainSection) {
+            console.error('Elementos de sección no encontrados');
+            return;
+        }
+
+        loginSection.style.display = 'none';
+        mainSection.style.display = 'block';
+        
+        if (userNameElement && currentUser) {
+            userNameElement.textContent = currentUser.email || 'Usuario';
+        }
+
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        if (emailInput) emailInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+
+    } catch (error) {
+        console.error('Error al manejar login exitoso:', error);
+        alert('Error al cargar la interfaz después del login');
+    }
+}
+
+function handleAuthError(error) {
+    console.error('Error en autenticación:', error);
+    let errorMessage = 'Error al iniciar sesión';
+    
+    switch (error.code) {
+        case 'auth/invalid-email':
+            errorMessage = 'Email inválido';
+            break;
+        case 'auth/user-disabled':
+            errorMessage = 'Usuario deshabilitado';
+            break;
+        case 'auth/user-not-found':
+            errorMessage = 'Usuario no encontrado';
+            break;
+        case 'auth/wrong-password':
+            errorMessage = 'Contraseña incorrecta';
+            break;
+        default:
+            errorMessage = error.message;
+    }
+    
+    alert(errorMessage);
+}

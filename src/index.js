@@ -1,19 +1,14 @@
-import './styles/main.css';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '@popperjs/core';
+import 'bootstrap';
+
 import { auth, db } from './js/firebase';
-import { 
-    GoogleAuthProvider, 
-    signInWithPopup, 
-    signInWithEmailAndPassword 
-} from 'firebase/auth';
-import { 
-    collection, 
-    addDoc, 
-    doc, 
-    getDoc, 
-    updateDoc 
-} from 'firebase/firestore';
+
+import { loginWithGoogle,loginWithEmail,logout } from "./js/auth";
+
 import { OrderManager } from './js/orders';
-import { userProductManager } from './js/userProducts';
+import { ProductManager } from './js/products';
 
 // Variables globales
 const orderManager = new OrderManager();
@@ -23,14 +18,34 @@ let hasUnsavedChanges = false;
 let currentOrderData = null;
 
 // Productos disponibles
-const PRODUCTS = [
-    { id: 'emp-carne', name: 'Empanada de Carne', price: 100 },
-    { id: 'emp-pollo', name: 'Empanada de Pollo', price: 100 },
-    { id: 'emp-mondongo', name: 'Empanada de Mondongo', price: 100 },
-    { id: 'sfija', name: 'Sfija', price: 120 },
-    { id: 'canasta', name: 'Canasta', price: 150 }
-];
+const productManager = new ProductManager();
 
+/* { active: true, id: 'emp-carne', name: 'Empanada de Carne', price: 100 },
+{ id: 'emp-pollo', name: 'Empanada de Pollo', price: 100 },
+{ id: 'emp-mondongo', name: 'Empanada de Mondongo', price: 100 },
+{ id: 'sfija', name: 'Sfija', price: 120 },
+{ id: 'canasta', name: 'Canasta', price: 150 } */
+
+    let PRODUCTS = [];
+    
+  try {
+    
+      const loadProducts = async () => {
+          PRODUCTS = await productManager.fetchProductsFromFirebase();
+      };
+      
+      // Cargar productos sin bloquear la ejecución
+      (async () => {
+          await loadProducts();
+      })().catch(error => {
+          console.error("Error cargando productos:", error);
+          PRODUCTS = []; // Asignar array vacío como fallback
+      });
+        
+    } catch (error) {
+        alert(error.message || 'Error al cargar Productos');
+    }
+   
 // Definir showOrderView en el ámbito global
 window.showOrderView = async function(orderId) {
     try {
@@ -73,85 +88,7 @@ window.showOrderView = async function(orderId) {
     }
 };
 
-// Funciones de autenticación
-async function loginWithEmail(email, password) {
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        currentUser = userCredential.user;
-        handleSuccessfulLogin();
-        return userCredential.user;
-    } catch (error) {
-        handleAuthError(error);
-        throw error;
-    }
-}
 
-async function loginWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    try {
-        const result = await signInWithPopup(auth, provider);
-        currentUser = result.user;
-        handleSuccessfulLogin();
-        return result.user;
-    } catch (error) {
-        handleAuthError(error);
-        throw error;
-    }
-}
-
-// Funciones de manejo de UI
-function handleSuccessfulLogin() {
-    try {
-        const loginSection = document.getElementById('loginSection');
-        const mainSection = document.getElementById('mainSection');
-        const userNameElement = document.getElementById('userName');
-
-        if (!loginSection || !mainSection) {
-            console.error('Elementos de sección no encontrados');
-            return;
-        }
-
-        loginSection.style.display = 'none';
-        mainSection.style.display = 'block';
-        
-        if (userNameElement && currentUser) {
-            userNameElement.textContent = currentUser.email || 'Usuario';
-        }
-
-        const emailInput = document.getElementById('emailInput');
-        const passwordInput = document.getElementById('passwordInput');
-        if (emailInput) emailInput.value = '';
-        if (passwordInput) passwordInput.value = '';
-
-    } catch (error) {
-        console.error('Error al manejar login exitoso:', error);
-        alert('Error al cargar la interfaz después del login');
-    }
-}
-
-function handleAuthError(error) {
-    console.error('Error en autenticación:', error);
-    let errorMessage = 'Error al iniciar sesión';
-    
-    switch (error.code) {
-        case 'auth/invalid-email':
-            errorMessage = 'Email inválido';
-            break;
-        case 'auth/user-disabled':
-            errorMessage = 'Usuario deshabilitado';
-            break;
-        case 'auth/user-not-found':
-            errorMessage = 'Usuario no encontrado';
-            break;
-        case 'auth/wrong-password':
-            errorMessage = 'Contraseña incorrecta';
-            break;
-        default:
-            errorMessage = error.message;
-    }
-    
-    alert(errorMessage);
-}
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
@@ -166,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
-            await loginWithEmail(email, password);
+            currentUser = await loginWithEmail(email, password);
         } catch (error) {
             console.error('Error en el proceso de login:', error);
         }
@@ -175,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Login con Google
     document.getElementById('btnLoginGoogle')?.addEventListener('click', async () => {
         try {
-            await loginWithGoogle();
+            currentUser = await loginWithGoogle();
         } catch (error) {
             console.error('Error en el proceso de login con Google:', error);
         }
@@ -213,12 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Verificar si hay un orderId en la URL
-            const params = new URLSearchParams(window.location.search);
-            const sharedOrderId = params.get('order');
-            
-            if (sharedOrderId) {
-                showOrderView(sharedOrderId);
-            }
+            verificarOrderIdEnURL();
+          
+
         } else {
             const mainSection = document.getElementById('mainSection');
             const loginSection = document.getElementById('loginSection');
@@ -226,6 +160,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 mainSection.style.display = 'none';
                 loginSection.style.display = 'block';
             }
+        }
+    });
+    document.getElementById('btnLogout')?.addEventListener('click', async () => {
+        try {
+            await logout(); 
+            window.location.reload();
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+            alert('Error al cerrar sesión');
         }
     });
 
@@ -276,12 +219,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Verificar si hay un orderId en la URL al cargar
-    const params = new URLSearchParams(window.location.search);
-    const sharedOrderId = params.get('order');
-    if (sharedOrderId) {
-        currentOrderId = sharedOrderId;
+    // Función para verificar si hay un orderId en la URL al cargar
+    function verificarOrderIdEnURL() {
+        const pathArray = window.location.pathname.split('/');
+        const currentPage = pathArray[pathArray.length - 1];
+        const params = new URLSearchParams(window.location.search);
+        const sharedOrderId = params.get('order');
+        
+        if (sharedOrderId) {
+            currentOrderId = sharedOrderId;
+            if (currentPage === 'pedido.html') {
+                showOrderView(currentOrderId)
+            } else  
+            window.location.href = `pedido.html?order=${currentOrderId}`;
+        }
+        
     }
+   
 
     // Modal y botones de resumen
     const modal = document.getElementById('summaryModal');
@@ -394,6 +348,36 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.style.display = 'block';
         }
     });
+
+    // Manejar el envío del formulario para agregar productos
+    document.getElementById('addCustomProductForm')?.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevenir el comportamiento por defecto del formulario
+        const productName = document.getElementById('newProductName').value.trim();
+        const productPrice = parseFloat(document.getElementById('newProductPrice').value);
+        const orderId = currentOrderId; // Obtener el orderId actual
+
+        if (!productName || isNaN(productPrice) || productPrice <= 0) {
+            alert('Por favor, completa todos los campos correctamente.');
+            return;
+        }
+
+        try {
+            const newProduct = await productManager.addProduct(productName, productPrice,orderId);
+            if (newProduct) {
+                alert('Producto agregado exitosamente');
+                // Limpiar el formulario
+                document.getElementById('newProductName').value = '';
+                document.getElementById('newProductPrice').value = '';
+                // Opcional: actualizar la lista de productos personalizados
+                displayCustomProducts();
+            } else {
+                alert('No tienes permiso para agregar productos.');
+            }
+        } catch (error) {
+            console.error('Error al agregar producto:', error);
+            alert('Error al agregar el producto');
+        }
+    });
 });
 
 // Cerrar modal de administración de productos
@@ -416,7 +400,8 @@ function showProducts() {
 
     productSection.style.display = 'block';
     productList.innerHTML = '';
-    
+
+  
     PRODUCTS.forEach(product => {
         const div = document.createElement('div');
         div.className = 'product-item';
@@ -428,14 +413,7 @@ function showProducts() {
     });
 }
 
-// Verificar pedido en URL al cargar
-window.addEventListener('load', () => {
-    const params = new URLSearchParams(window.location.search);
-    const orderId = params.get('order');
-    if (orderId) {
-        currentOrderId = orderId;
-    }
-});
+
 
 // Función para mostrar pedidos activos
 function displayActiveOrders(orders) {
@@ -451,7 +429,8 @@ function displayActiveOrders(orders) {
                 <h4>${order.name || 'Pedido sin nombre'}</h4>
                 <p>Creado: ${order.createdAt?.toDate().toLocaleString()}</p>
             </div>
-            <button onclick="showOrderView('${order.id}')">Ver Pedido</button>
+            <!-- <button onclick="showOrderView('${order.id}')">Ver Pedido</button> -->
+            <a href="pedido.html?order=${order.id}" >Ver Pedido</a>
         `;
         activeOrdersList.appendChild(orderElement);
     });
@@ -722,4 +701,17 @@ function generatePriceSummary(orderData) {
     summaryText += '\nTotal: $' + totalAmount;
     
     return summaryText;
+}
+
+// Función para mostrar productos personalizados
+async function displayCustomProducts() {
+    const customProductsList = document.getElementById('customProductsList');
+    customProductsList.innerHTML = ''; // Limpiar la lista
+
+    const products = await productManager.getProducts(); // Obtener productos activos
+    products.forEach(product => {
+        const productDiv = document.createElement('div');
+        productDiv.textContent = `${product.name} - $${product.price}`;
+        customProductsList.appendChild(productDiv);
+    });
 }

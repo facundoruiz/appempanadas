@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App de Pedidos de Empanadas</title>
+</head>
+<body>
+    <!-- Sección de Login -->
+    <div id="loginSection">
+        <h2>Iniciar Sesión</h2>
+        <div class="auth-form">
+            <input type="email" id="emailInput" placeholder="Email" required>
+            <input type="password" id="passwordInput" placeholder="Contraseña" required>
+            <button id="btnLoginEmail">Iniciar sesión</button>
+            <button id="btnRegister">Registrarse</button>
+            <div class="separator">
+                <span>o</span>
+            </div>
+
+            <!-- Login con Google -->
+            <button id="btnLoginGoogle">
+                <img src="https://www.google.com/favicon.ico" alt="Google icon" width="20">
+                Iniciar sesión con Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Sección Principal (inicialmente oculta) -->
+    <div id="mainSection" style="display: none;">
+        <header>
+            <h2>Bienvenido, <span id="userName">Usuario</span></h2>
+            <button id="btnLogout">Cerrar sesión</button>
+        </header>
+
+        <!-- Sección de pedidos -->
+        <div id="ordersSection">
+            <!-- Crear nuevo pedido -->
+            <div class="create-order">
+                <h3>Crear nuevo pedido</h3>
+                <input type="text" id="orderName" placeholder="Nombre del pedido (opcional)">
+                <button id="btnCreateOrder">Crear Nuevo Pedido</button>
+            </div>
+
+            <!-- Lista de pedidos activos -->
+            <div class="active-orders">
+                <h3>Pedidos Activos</h3>
+                <div id="activeOrdersList"></div>
+            </div>
+        </div>
+
+        <!-- Sección de productos (inicialmente oculta) -->
+        <div id="productSection" style="display: none;">
+            <button id="btnBackToOrders">← Volver a la lista de pedidos</button>
+            <h3>Pedido: <span id="currentOrderName"></span></h3>
+            <div class="order-info">
+                <p>Creado por: <span id="orderCreator"></span></p>
+                <p>Link para compartir: <input type="text" id="shareLink" readonly></p>
+                <button id="btnCopyLink">Copiar Link</button>
+                
+                <!-- Nuevo botón de administración solo visible para el creador -->
+                <button id="btnManageProducts" class="btn-admin" style="display: none;">
+                    ➕ Agregar Nuevos Productos
+                </button>
+            </div>
+            
+            <!-- Contenedor para el modal de administración de productos -->
+        <!-- Modal para administración de productos -->
+         <!-- Estructura del Modal -->
+<div class="modal fade" id="productAdminModal" tabindex="-1" aria-labelledby="productAdminModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- Cabecera del Modal -->
+        <div class="modal-header">
+          <h5 class="modal-title" id="productAdminModalLabel">Título del Modal</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <!-- Cuerpo del Modal -->
+        <div class="modal-body">
+            <h2>Administrar Productos</h2>
+            <form id="addCustomProductForm">
+                <input type="text" id="newProductName" placeholder="Nombre del producto" required>
+                <input type="number" id="newProductPrice" placeholder="Precio" required>
+                <button type="submit">Agregar Producto</button>
+            </form>
+            <div id="customProductsList"></div>
+        </div>
+        <!-- Pie del Modal -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- Lista de productos del pedido -->
+    <div id="orderProducts">
+        <!-- Aquí se mostrarán los productos disponibles -->
+    </div>
+            
+            <div class="products-container">
+                <h4>Selecciona tus productos:</h4>
+                <div id="productList"></div>
+                <button id="btnSaveOrder">Guardar Pedido</button>
+            </div>
+
+            <!-- Resumen del pedido -->
+            <div id="orderSummary">
+                <h4>Resumen del Pedido</h4>
+                <div id="orderDetails"></div>
+                <div id="totalAmount"></div>
+                
+                <!-- Agregar botones para el resumen -->
+                <div class="summary-actions">
+                    <button id="btnCopySummary" class="btn-primary">
+                        📋 Copiar Cantidades
+                    </button>
+                    <button id="btnCopyPriceSummary" class="btn-secondary">
+                        💰 Copiar con Precios
+                    </button>
+                    <button id="btnShowTotalSummary" class="btn-info" data-bs-toggle="modal" data-bs-target="#summaryModal">
+                        📊 Ver Detalle Completo
+                    </button>
+                </div>
+
+                <!-- Modal para mostrar el resumen -->
+               
+  
+  <!-- Estructura del Modal -->
+  <div class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- Cabecera del Modal -->
+        <div class="modal-header">
+          <h5 class="modal-title" id="summaryModalLabel">Título del Modal</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <!-- Cuerpo del Modal -->
+        <div class="modal-body">
+            <h3>📋 Resumen Total del Pedido</h3>
+            <div id="totalSummary"></div>
+        </div>
+        <!-- Pie del Modal -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('btnCopyLink')?.addEventListener('click', () => {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            alert('Link copiado al portapapeles');
+        });
+    </script>
+</body>
+</html>
