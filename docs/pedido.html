@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App de Pedidos de Empanadas</title>
+    
+<script defer src="assets/js/app.js?01578e9b9cdf996787b6"></script><link href="assets/css/app.min.css?01578e9b9cdf996787b6" rel="stylesheet"></head>
+
+<body class="bg-light">
+    <div class="container py-5">
+        <!-- Sección de Login -->
+        <div id="loginSection" class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+                        <div class="auth-form">
+                            <div class="mb-3">
+                                <input type="email" id="emailInput" class="form-control" placeholder="Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" id="passwordInput" class="form-control" placeholder="Contraseña" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button id="btnLoginEmail" class="btn btn-primary">Iniciar sesión</button>
+                                <button id="btnRegister" class="btn btn-outline-secondary">Registrarse</button>
+                            </div>
+                            <div class="separator text-center my-3">
+                                <span class="bg-light px-2">o</span>
+                            </div>
+                            <div class="d-grid">
+                                <button id="btnLoginGoogle" class="btn btn-light border">
+                                    <img src="https://www.google.com/favicon.ico" alt="Google icon" width="20" class="me-2">
+                                    Iniciar sesión con Google
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección Principal (inicialmente oculta) -->
+        <div id="mainSection" class="mt-4" style="display: none;">
+            <header class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2>Bienvenido, <span id="userName">Usuario</span></h2>
+                    <button id="btnLogout" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                    </button>
+                </div>
+            </header>
+
+            <!-- Sección de pedidos -->
+            <div id="ordersSection" class="row">
+                <!-- Crear nuevo pedido -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h3 class="card-title">Crear nuevo pedido</h3>
+                            <div class="input-group mb-3">
+                                <input type="text" id="orderName" class="form-control" placeholder="Nombre del pedido (opcional)">
+                                <button id="btnCreateOrder" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Crear Nuevo Pedido
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de pedidos activos -->
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h3 class="card-title">Pedidos Activos</h3>
+                            <div id="activeOrdersList" class="list-group"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de productos (inicialmente oculta) -->
+            <div id="productSection" class="mt-4" style="display: none;">
+                <button id="btnBackToOrders" class="btn btn-outline-secondary mb-3">
+                    <i class="bi bi-arrow-left me-2"></i>Volver a la lista de pedidos
+                </button>
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h3 class="card-title">Pedido: <span id="currentOrderName"></span></h3>
+                        <div class="order-info mb-3">
+                            <p>Creado por: <span id="orderCreator"></span></p>
+                            <div class="input-group mb-3">
+                                <input type="text" id="shareLink" class="form-control" readonly>
+                                <button id="btnCopyLink" class="btn btn-outline-secondary">
+                                    <i class="bi bi-clipboard me-2"></i>Copiar Link
+                                </button>
+                            </div>
+                            <button id="btnManageProducts" class="btn btn-primary" style="display: none;">
+                                <i class="bi bi-plus-circle me-2"></i>Agregar Nuevos Productos
+                            </button>
+                        </div>
+
+                        <!-- Lista de productos del pedido -->
+                        <div id="orderProducts" class="mb-4">
+                            <!-- Aquí se mostrarán los productos disponibles -->
+                        </div>
+
+                        <div class="products-container">
+                            <h4>Selecciona tus productos:</h4>
+                            <div id="productList" class="mb-3"></div>
+                            <button id="btnSaveOrder" class="btn btn-success">
+                                <i class="bi bi-save me-2"></i>Guardar Pedido
+                            </button>
+                        </div>
+
+                        <!-- Resumen del pedido -->
+                        <div id="orderSummary" class="mt-4">
+                            <h4>Resumen del Pedido</h4>
+                            <div id="orderDetails" class="mb-3"></div>
+                            <div id="totalAmount" class="mb-3"></div>
+
+                            <!-- Agregar botones para el resumen -->
+                            <div class="summary-actions">
+                                <button id="btnCopySummary" class="btn btn-primary me-2">
+                                    <i class="bi bi-clipboard me-2"></i>Copiar Cantidades
+                                </button>
+                                <button id="btnCopyPriceSummary" class="btn btn-secondary me-2">
+                                    <i class="bi bi-currency-dollar me-2"></i>Copiar con Precios
+                                </button>
+                                <button id="btnShowTotalSummary" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#summaryModal">
+                                    <i class="bi bi-list-ul me-2"></i>Ver Detalle Completo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para administración de productos -->
+    <div class="modal fade" id="productAdminModal" tabindex="-1" aria-labelledby="productAdminModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productAdminModalLabel">Administrar Productos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCustomProductForm" class="mb-3">
+                        <div class="mb-3">
+                            <input type="text" id="newProductName" class="form-control" placeholder="Nombre del producto" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="number" id="newProductPrice" class="form-control" placeholder="Precio" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Agregar Producto</button>
+                    </form>
+                    <div id="customProductsList"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar el resumen -->
+    <div class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="summaryModalLabel">Resumen Total del Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <pre id="totalSummary"></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('btnCopyLink')?.addEventListener('click', () => {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            alert('Link copiado al portapapeles');
+        });
+    </script>
+</body>
+
+</html>
+

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App de Pedidos de Empanadas</title>
+    
+<script defer src="assets/js/app.js?01578e9b9cdf996787b6"></script><link href="assets/css/app.min.css?01578e9b9cdf996787b6" rel="stylesheet"></head>
+
+<body class="bg-light">
+    <div class="container py-5">
+        <!-- Sección de Login -->
+        <div id="loginSection" class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+                        <form class="auth-form">
+                            <div class="mb-3">
+                                <input type="email" id="emailInput" class="form-control" placeholder="Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" id="passwordInput" class="form-control" placeholder="Contraseña" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button id="btnLoginEmail" class="btn btn-primary">Iniciar sesión</button>
+                                <button id="btnRegister" class="btn btn-outline-secondary">Registrarse</button>
+                            </div>
+                        </form>
+                        <hr class="my-4">
+                        <div class="d-grid">
+                            <button id="btnLoginGoogle" class="btn btn-light border">
+                                <img src="https://www.google.com/favicon.ico" alt="Google icon" width="20" class="me-2">
+                                Iniciar sesión con Google
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección Principal (inicialmente oculta) -->
+        <div id="mainSection" style="display: none;">
+            <header class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2>Bienvenido, <span id="userName" class="user-name">Usuario</span></h2>
+                    <button id="btnLogout" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                    </button>
+                </div>
+            </header>
+
+            <!-- Sección de pedidos -->
+            <div id="ordersSection" class="row">
+                <!-- Crear nuevo pedido -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h3 class="card-title">Crear nuevo pedido</h3>
+                            <div class="input-group mb-3">
+                                <input type="text" id="orderName" class="form-control" placeholder="Nombre del pedido (opcional)">
+                                <button id="btnCreateOrder" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Crear Pedido
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de pedidos activos -->
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h3 class="card-title">Pedidos Activos</h3>
+                            <div id="activeOrdersList" class="list-group"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+</body>
+
+</html>
