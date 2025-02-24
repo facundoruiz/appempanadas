@@ -1,0 +1,38 @@
+ name: CI
+
+on:
+  push:
+    branches:
+      - main  # Cambia esto si tu rama principal tiene otro nombre
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # Cambia esto a la versión que necesites
+
+      - name: Install dependencies
+        run: npm install  # Cambia esto si usas otro gestor de paquetes
+
+      - name: Build project
+        run: npm run build  # Cambia esto si tu comando de build es diferente
+
+      - name: Deploy to docs
+        run: npm run deploy-docs  # Cambia esto si tu comando de despliegue es diferente
+        env:
+          FIRESTONE_CONFIG: ${{ secrets.FIRESTONE_CONFIG }}
+
+      - name: Deploy to GH Page
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        with:
+          branch: gh-pages
+          folder: docs  # Cambié 'src' a 'docs' para que coincida con la convención de despliegue
+        env:
+          FIRESTONE_CONFIG: ${{ secrets.FIRESTONE_CONFIG }}    
