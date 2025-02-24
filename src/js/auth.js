@@ -18,10 +18,10 @@ export const loginWithGoogle = async () => {
         const result = await signInWithPopup(auth, provider);
         await createUserProfile(result.user);
     
-        handleSuccessfulLogin();
+        onLoginSuccess(result.user); // Usar callback para login exitoso
         return result.user;
     } catch (error) {
-        handleAuthError(error);
+        onAuthError(error); // Usar callback para error de autenticación
         throw error;
     }
    
@@ -32,10 +32,10 @@ export const loginWithEmail = async (email, password) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         currentUser = userCredential.user;
-        handleSuccessfulLogin();
+        onLoginSuccess(userCredential.user); // Usar callback para login exitoso
         return userCredential.user;
     } catch (error) {
-        handleAuthError(error);
+        onAuthError(error); // Usar callback para error de autenticación
         throw error;
     }
 };
@@ -63,7 +63,7 @@ const createUserProfile = async (user) => {
         }, { merge: true });
     } catch (error) {
         console.error('Error creando perfil:', error);
-        throw error;
+        throw new Error('Error al crear perfil de usuario en Firestore');
     }
 };
 
@@ -77,37 +77,14 @@ export const logout = async () => {
     }
 };
 
-// Funciones de manejo de UI
-function handleSuccessfulLogin () {
-    try {
-        const loginSection = document.getElementById('loginSection');
-        const mainSection = document.getElementById('mainSection');
-        const userNameElement = document.getElementById('userName');
-
-        if (!loginSection || !mainSection) {
-            console.error('Elementos de sección no encontrados');
-            return;
-        }
-
-        loginSection.style.display = 'none';
-        mainSection.style.display = 'block';
-        
-        if (userNameElement && currentUser) {
-            userNameElement.textContent = currentUser.email || 'Usuario';
-        }
-
-        const emailInput = document.getElementById('emailInput');
-        const passwordInput = document.getElementById('passwordInput');
-        if (emailInput) emailInput.value = '';
-        if (passwordInput) passwordInput.value = '';
-
-    } catch (error) {
-        console.error('Error al manejar login exitoso:', error);
-        alert('Error al cargar la interfaz después del login');
-    }
+// Funciones para manejar el estado de autenticación (Callbacks para UI)
+function onLoginSuccess (user) {
+    // Notificar a la UI para actualizar el estado a "logueado"
+    console.log('Login exitoso para usuario:', user.email);
+    // Aquí se podría llamar a un callback o dispatch de evento para actualizar la UI
 }
 
-function handleAuthError(error) {
+function onAuthError(error) {
     console.error('Error en autenticación:', error);
     let errorMessage = 'Error al iniciar sesión';
     
@@ -127,6 +104,6 @@ function handleAuthError(error) {
         default:
             errorMessage = error.message;
     }
-    
-    alert(errorMessage);
+    // Notificar a la UI para mostrar el error
+    alert(errorMessage); // Esto debería ser reemplazado por un método de UI más adecuado
 }

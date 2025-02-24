@@ -144,6 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 mainSection.style.display = 'block';
             }
 
+            // Mostrar el nombre del usuario
+            const userNameElement = document.getElementById('userName');
+            if (userNameElement) {
+                userNameElement.textContent = user.displayName || user.email;
+            }
+
             // Escuchar pedidos activos del usuario
             orderManager.listenToUserOrders(user.uid, (orders) => {
                 displayActiveOrders(orders);
@@ -228,6 +234,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (sharedOrderId) {
             currentOrderId = sharedOrderId;
+            // Agregar el pedido a la lista de pedidos compartidos del usuario
+            addSharedOrderToUser(sharedOrderId);
             if (currentPage === 'pedido.html') {
                 showOrderView(currentOrderId)
             } else  
@@ -236,6 +244,33 @@ document.addEventListener('DOMContentLoaded', () => {
         
     }
    
+    async function addSharedOrderToUser(orderId) {
+        if (!currentUser) {
+            console.error('Usuario no autenticado');
+            return;
+        }
+    
+        try {
+            const userRef = db.collection('users').doc(currentUser.uid);
+            const userDoc = await userRef.get();
+    
+            if (!userDoc.exists) {
+                // Si el documento del usuario no existe, créalo
+                await userRef.set({ sharedOrders: [orderId] });
+            } else {
+                const userData = userDoc.data();
+                let sharedOrders = userData.sharedOrders || [];
+    
+                // Verificar si el pedido ya está en la lista
+                if (!sharedOrders.includes(orderId)) {
+                    sharedOrders.push(orderId);
+                    await userRef.update({ sharedOrders: sharedOrders });
+                }
+            }
+        } catch (error) {
+            console.error('Error al agregar pedido compartido:', error);
+        }
+    }
 
     // Modal y botones de resumen
     const modal = document.getElementById('summaryModal');
@@ -378,6 +413,24 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Error al agregar el producto');
         }
     });
+
+    // Event listener para cerrar pedido
+    document.getElementById('activeOrdersList')?.addEventListener('click', async (event) => {
+        if (event.target.classList.contains('btn-close-order')) {
+            const orderId = event.target.dataset.orderId;
+            try {
+                await orderManager.closeOrder(orderId);
+                alert('Pedido cerrado exitosamente');
+                // Recargar la lista de pedidos activos
+                orderManager.listenToUserOrders(currentUser.uid, (orders) => {
+                    displayActiveOrders(orders);
+                });
+            } catch (error) {
+                console.error('Error al cerrar pedido:', error);
+                alert('Error al cerrar el pedido');
+            }
+        }
+    });
 });
 
 // Cerrar modal de administración de productos
@@ -431,6 +484,7 @@ function displayActiveOrders(orders) {
             </div>
             <!-- <button onclick="showOrderView('${order.id}')">Ver Pedido</button> -->
             <a href="pedido.html?order=${order.id}" >Ver Pedido</a>
+            ${order.createdBy === auth.currentUser?.uid ? `<button class="btn-close-order" data-order-id="${order.id}">Cerrar Pedido</button>` : ''}
         `;
         activeOrdersList.appendChild(orderElement);
     });

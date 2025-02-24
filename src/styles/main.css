@@ -459,3 +459,9 @@ button:hover {
 .product-item.custom {
     background-color: #f8f9fa;
 }
+
+.user-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+}

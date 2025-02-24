@@ -85,19 +85,65 @@ export class OrderManager {
 
     // Obtener pedidos activos del usuario
     listenToUserOrders(userId, callback) {
-        const q = query(
+        // Primero, obtener los pedidos creados por el usuario
+        const createdOrdersQuery = query(
             collection(db, 'orders'),
             where('status', '==', 'active'),
             where('createdBy', '==', userId)
         );
 
-        return onSnapshot(q, (snapshot) => {
-            const orders = [];
-            snapshot.forEach((doc) => {
-                orders.push({ id: doc.id, ...doc.data() });
-            });
-            callback(orders);
+        let createdOrders = [];
+        const unsubscribeCreated = onSnapshot(createdOrdersQuery, (snapshot) => {
+            createdOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Combinar y enviar todos los pedidos
+            combineAndSendOrders();
         });
+
+        // Luego, obtener los pedidos compartidos con el usuario
+        const sharedOrdersQuery = query(
+            collection(db, 'users'),
+            where('__name__', '==', userId)
+        );
+
+        let sharedOrders = [];
+        const unsubscribeShared = onSnapshot(sharedOrdersQuery, (snapshot) => {
+            if (!snapshot.empty) {
+                const userData = snapshot.docs[0].data();
+                const sharedOrderIds = userData.sharedOrders || [];
+
+                // Si no hay pedidos compartidos, enviar solo los pedidos creados
+                if (sharedOrderIds.length === 0) {
+                    sharedOrders = [];
+                    combineAndSendOrders();
+                    return;
+                }
+
+                // Obtener los documentos de los pedidos compartidos
+                Promise.all(sharedOrderIds.map(orderId => 
+                    getDoc(doc(db, 'orders', orderId))
+                )).then(orderDocs => {
+                    sharedOrders = orderDocs
+                        .filter(doc => doc.exists())
+                        .map(doc => ({ id: doc.id, ...doc.data() }));
+                    combineAndSendOrders();
+                });
+            } else {
+                sharedOrders = [];
+                combineAndSendOrders();
+            }
+        });
+
+        // Función para combinar y enviar los pedidos
+        function combineAndSendOrders() {
+            const allOrders = [...createdOrders, ...sharedOrders];
+            callback(allOrders);
+        }
+
+        // Devolver una función para dejar de escuchar ambos streams
+        return () => {
+            unsubscribeCreated();
+            unsubscribeShared();
+        };
     }
 
     // Dejar de escuchar cambios
@@ -119,13 +165,23 @@ export class OrderManager {
                 throw new Error('El pedido no existe');
             }
 
+            // Validar que items sea un array y que cada item tenga precio y cantidad
+            if (!Array.isArray(items) || !items.every(item => item.price !== undefined && item.quantity !== undefined)) {
+                throw new Error('Items inválidos: deben ser un array de objetos con precio y cantidad');
+            }
+
             const updates = {
                 [`items.${userId}`]: items,
                 updatedAt: serverTimestamp()
             };
 
-            await updateDoc(orderRef, updates);
-            await this.updateOrderTotal(orderId);
+            try {
+                await updateDoc(orderRef, updates);
+                await this.updateOrderTotal(orderId);
+            } catch (error) {
+                console.error('Error al actualizar el documento del pedido:', error);
+                throw new Error('Error al agregar items al pedido en Firestore');
+            }
         } catch (error) {
             console.error('Error al agregar items:', error);
             throw error;

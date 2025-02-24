@@ -58,7 +58,8 @@ export class ProductManager {
 
     // Guardar producto en Firebase
     async saveProductToFirebase(product, orderId) {
-        const productRef = doc(db, 'orders', orderId, 'products', product.id);
+        // Guarda el producto en la colección general de productos
+        const productRef = doc(collection(db, 'products'), product.id);
         await setDoc(productRef, product);
     }
 
@@ -91,5 +92,3 @@ export class ProductManager {
         return false;
     }
 }
-
-
