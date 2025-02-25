@@ -23,9 +23,6 @@ jobs:
 
       - name: Build project
         run: npm run build  # Cambia esto si tu comando de build es diferente
-
-      - name: Deploy to docs
-        run: npm run deploy-docs  # Cambia esto si tu comando de despliegue es diferente
         env:
           FIRESTONE_CONFIG: ${{ secrets.FIRESTONE_CONFIG }}
 
