@@ -7,7 +7,9 @@ import {
     signInWithPopup,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signOut 
+    signOut,
+    signInAnonymously,
+    updateProfile 
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
@@ -52,13 +54,37 @@ export const registerWithEmail = async (email, password) => {
     }
 };
 
+// Registro anónimo con nombre de usuario
+export const loginAnonymously = async (username) => {
+    try {
+        const result = await signInAnonymously(auth);
+        // Actualizar el perfil con el nombre de usuario
+        await updateProfile(result.user, {
+            displayName: username
+        });
+        
+        // Crear perfil en Firestore
+        await createUserProfile({
+            ...result.user,
+            displayName: username
+        });
+
+        onLoginSuccess(result.user);
+        return result.user;
+    } catch (error) {
+        onAuthError(error);
+        throw error;
+    }
+};
+
 // Crear perfil de usuario en Firestore
 const createUserProfile = async (user) => {
     try {
         const userRef = doc(db, 'users', user.uid);
         await setDoc(userRef, {
-            email: user.email,
+            email: user.email || null,
             name: user.displayName || '',
+            isAnonymous: user.isAnonymous,
             createdAt: new Date()
         }, { merge: true });
     } catch (error) {

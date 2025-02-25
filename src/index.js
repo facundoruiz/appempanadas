@@ -118,6 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+     // Login anónimo
+     document.getElementById('btnLoginAnonymous')?.addEventListener('click', async () => {
+        try {
+            currentUser = await loginAnonymously();
+        } catch (error) {
+            console.error('Error en el proceso de login anónimo:', error);
+        }
+    });
+
     // Crear pedido
     document.getElementById('btnCreateOrder')?.addEventListener('click', async () => {
         try {
