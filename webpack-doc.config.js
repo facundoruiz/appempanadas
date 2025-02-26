@@ -2,7 +2,7 @@ const path = require("path");
 const autoprefixer = require("autoprefixer");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin"); //extrae css
-
+/*
 const webpack = require("webpack");
 const dotenv = require("dotenv");
 
@@ -11,9 +11,9 @@ const envKeys = Object.keys(env).reduce((prev, next) => {
   prev[`process.env.${next}`] = JSON.stringify(env[next]);
   return prev;
 }, {});
-
+*/
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: {
     app: './src/index.js',
     
@@ -103,11 +103,14 @@ module.exports = {
   resolve: {
     extensions: [".js"],
   },
-  devServer: {
-    static: path.resolve(__dirname, "./docs/"),
-    hot: true,
-    server: {
-      type: "https", // ✅ Correct for Webpack 5
-    },
+   optimization: {
+    minimize: true,
+    minimizer: [
+     new CssMinimizerPlugin(),
+      new TerserPlugin({
+        test: /\.js(\?.*)?$/i,
+      }),
+    ],
+
   },
 };
