@@ -33,7 +33,6 @@ export const loginWithGoogle = async () => {
 export const loginWithEmail = async (email, password) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        currentUser = userCredential.user;
         onLoginSuccess(userCredential.user); // Usar callback para login exitoso
         return userCredential.user;
     } catch (error) {
